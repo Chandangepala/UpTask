@@ -1,4 +1,4 @@
-package com.app.archcompelemtsample;
+package com.app.uptask;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,12 +14,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.archcompelemtsample.activities.AddEditNoteActivity;
-import com.app.archcompelemtsample.adapters.NoteAdapter;
-import com.app.archcompelemtsample.models.Note;
-import com.app.archcompelemtsample.viewmodel.NoteViewModel;
+import com.app.uptask.activities.AddEditNoteActivity;
+import com.app.uptask.adapters.NoteAdapter;
+import com.app.uptask.models.Note;
+import com.app.uptask.viewmodel.NoteViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -32,12 +34,15 @@ public class MainActivity extends AppCompatActivity {
     private NoteViewModel noteViewModel;
     RecyclerView recyclerVwNotes;
     NoteAdapter noteAdapter = new NoteAdapter();
+
+    TextView textMessage;
     FloatingActionButton fltActionBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        textMessage = findViewById(R.id.txt_msg);
         fltActionBtn = findViewById(R.id.flt_add_note_btn);
 
         fltActionBtn.setOnClickListener(v -> {
@@ -47,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
         noteViewModel = new ViewModelProvider(this).get(NoteViewModel.class);
 
-        //noteViewModel.insert(new Note("Title X", "Description X", 4));
 
         setRecyclerView(); //To set recycler view and it's adapter and arraylist
 
@@ -58,10 +62,18 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(List<Note> notes) {
                 //Toast.makeText(MainActivity.this, "onChanged: " + notes.get(3).getTitle() , Toast.LENGTH_SHORT).show();
                 Log.d("List", "" + notes.size());
+                if(notes.size() == 0){
+                    textMessage.setText("No Task Found");
+                    textMessage.setVisibility(View.VISIBLE);
+                }else{
+                    //textMessage.setText("!");
+                    textMessage.setVisibility(View.GONE);
+                }
                 noteAdapter.submitList(notes);
             }
         });
 
+        //To implement swipe delete to delete any saved note...
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT |
                 ItemTouchHelper.RIGHT) {
             @Override
@@ -76,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerVwNotes);
 
+        //To listen recycler view item clicks
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Note note) {
@@ -109,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             Note note = new Note(title, description, priority);
             noteViewModel.insert(note);
 
-            Toast.makeText(MainActivity.this, "Note Saved", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "Note Saved", Toast.LENGTH_SHORT).show();
         }else if (requestCode == EDIT_NOTE_REQUEST && resultCode == RESULT_OK){
              int id = data.getIntExtra(AddEditNoteActivity.EXTRA_ID, -1);
              if(id == -1){
